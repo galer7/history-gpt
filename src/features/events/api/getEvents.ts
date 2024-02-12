@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ExtractFnReturnType, QueryConfig } from "./../../../lib/react-query";
 import { HistoricalEvent } from "../types";
 import { getEventsFromLLM } from "../../../lib/openai";
-import { computeArcsFromEvents } from "../utils";
 
 export const getEvents = async (topic: string) => {
   if (import.meta.env.VITE_USE_MOCK_DATA === "true") {
@@ -128,33 +127,27 @@ function getMockEvents() {
   ];
 }
 
-export const useCurrentEvent = (events: HistoricalEvent[]) => {
+export const useCurrentEvent = () => {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
-
-  const handleNext = () => {
-    // stop at the last event
-    if (currentEventIndex === events.length - 1) return;
-
-    setCurrentEventIndex((prevIndex) => (prevIndex + 1) % events.length);
-  };
-
-  const handlePrev = () => {
-    // stop at the first event
-    if (currentEventIndex === 0) return;
-
-    setCurrentEventIndex((prevIndex) => (prevIndex - 1) % events.length);
-  };
 
   return {
     currentEventIndex,
-    handleNext,
-    handlePrev,
+    setCurrentEventIndex,
   };
 };
 
-export const useArcsSoFar = (
+export const computeArc = (
   events: HistoricalEvent[],
   currentEventIndex: number
 ) => {
-  return computeArcsFromEvents(events.slice(0, currentEventIndex + 1));
+  return currentEventIndex === 0
+    ? []
+    : [
+        {
+          startLat: events[currentEventIndex - 1].lat,
+          startLng: events[currentEventIndex - 1].lon,
+          endLat: events[currentEventIndex].lat,
+          endLng: events[currentEventIndex].lon,
+        },
+      ];
 };
