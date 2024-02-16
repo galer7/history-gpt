@@ -1,5 +1,5 @@
 import { ApiHandler } from "sst/node/api";
-import { Todo } from "@history-gpt/core/todo";
+import { Todo } from "@core/todo";
 
 export const create = ApiHandler(async (_evt) => {
   await Todo.create();
