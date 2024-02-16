@@ -11,4 +11,7 @@ export default defineConfig({
       "@web": path.resolve(__dirname, "src"),
     },
   },
+  server: {
+    port: 3008,
+  },
 });

@@ -13,6 +13,74 @@ function App() {
   const globEl = useRef<GlobeMethods>();
   const [newTopic, setNewTopic] = useState("");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+
+  const [, setLoading] = useState(true);
+  const [session, setSession] = useState<{
+    userId: string;
+    email: string;
+    picture: string;
+    name: string;
+  } | null>(null);
+
+  const getSession = async () => {
+    const token = localStorage.getItem("session");
+    if (token) {
+      const user = await getUserInfo(token);
+
+      console.log("user", user);
+      if (user) setSession(user);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    getSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const token = params.get("token");
+    if (token) {
+      localStorage.setItem("session", token);
+      window.location.replace(window.location.origin);
+    }
+  }, []);
+
+  const getUserInfo = async (session: string) => {
+    try {
+      return await fetch(`${import.meta.env.VITE_API_URL}/session`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session}`,
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json() as Promise<{
+              userId: string;
+              email: string;
+              picture: string;
+              name: string;
+            }>;
+          }
+
+          throw new Error("Something went wrong");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (error) {
+      alert(error);
+    }
+  };
+
+  const signOut = async () => {
+    localStorage.removeItem("session");
+    setSession(null);
+  };
 
   const {
     refetch,
@@ -41,6 +109,7 @@ function App() {
     if (!globe) return;
 
     setWindowWidth(window.innerWidth);
+    setWindowHeight(window.innerHeight);
   });
 
   useEffect(() => {
@@ -86,6 +155,38 @@ function App() {
 
   return (
     <main>
+      <div className="absolute top-0 left-0 z-30 p-4">
+        {session ? (
+          <div>
+            <img
+              className="h-10 w-10 rounded-full"
+              src={session.picture}
+              alt="profile picture"
+            />
+            <p className="text-white">Hello, {session.name}</p>
+            <button
+              className="bg-red-500 text-white font-bold py-2 px-4 rounded cursor-pointer"
+              onClick={() => signOut()}
+            >
+              Sign Out
+            </button>
+          </div>
+        ) : (
+          <button
+            className="bg-blue-500 text-white font-bold py-2 px-4 rounded cursor-pointer"
+            onClick={() => {
+              console.log("clicked");
+
+              window.location.href = `${
+                import.meta.env.VITE_API_URL
+              }/auth/google/authorize`;
+            }}
+          >
+            Sign In
+          </button>
+        )}
+      </div>
+
       {/* div for title. put in the top middle */}
       <div className="absolute top-0 z-10 w-full text-center p-4">
         <h1 className="text-white text-5xl">History GPT</h1>
@@ -135,6 +236,7 @@ function App() {
         arcsData={arc}
         ringsData={[ringData]}
         width={windowWidth}
+        height={windowHeight}
         animateIn={false}
       />
     </main>
