@@ -1,19 +1,48 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
+import { LanguageModelService } from "@core/boundaries/LanguageModelService";
+import { HistoricalEvent } from "@core/entities/HistoricalEvent";
 
-export const getEventsFromLLM = async (topic: string) => {
-  return await openai.chat.completions.create({
-    messages: [
-      {
-        role: "system",
-        content: `You are a historian. You are writing a brief visual history of ${topic}.`,
-      },
-    ],
-    model: "gpt-3.5-turbo",
+interface OpenAILanguageModelServiceDependencies {
+  apiKey: string;
+}
+
+export const openAILanguageModelService = ({
+  apiKey,
+}: OpenAILanguageModelServiceDependencies): LanguageModelService => {
+  const openai = new OpenAI({
+    apiKey,
+  });
+
+  const getHistoricalEvents = async (topic: string) => {
+    const response = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `You are a historian. You are writing a brief visual history of ${topic}.`,
+        },
+      ],
+      model: "gpt-3.5-turbo",
+      ...getHistoryToolsConfig(),
+    });
+
+    const events = JSON.parse(
+      response.choices[0].message.tool_calls?.[0].function.arguments || "[]"
+    ).events as HistoricalEvent[];
+
+    return events;
+  };
+
+  return {
+    getHistoricalEvents,
+  };
+};
+
+function getHistoryToolsConfig(): {
+  tool_choice: OpenAI.Chat.Completions.ChatCompletionToolChoiceOption;
+  tools: OpenAI.Chat.Completions.ChatCompletionTool[];
+} {
+  return {
     tool_choice: {
       type: "function",
       function: {
@@ -64,5 +93,5 @@ export const getEventsFromLLM = async (topic: string) => {
         },
       },
     ],
-  });
-};
+  };
+}
