@@ -1,5 +1,5 @@
-import { HistoricalEvent } from "../types";
-import Event from "./Event";
+import { HistoricalEvent } from "@core/entities/HistoricalEvent";
+import Event from "@web/features/events/components/Event";
 
 function EventsList({
   events,

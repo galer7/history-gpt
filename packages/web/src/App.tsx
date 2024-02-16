@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import Globe, { GlobeMethods } from "react-globe.gl";
+import clsx from "clsx";
 
 import {
   computeArc,
   useCurrentEvent,
   useEvents,
-} from "./features/events/api/getEvents";
-import { clsx } from "./lib/clsx";
-import EventsList from "./features/events/components/EventsList";
+} from "@web/features/events/api/getEvents";
+import EventsList from "@web/features/events/components/EventsList";
 
 function App() {
   const globEl = useRef<GlobeMethods>();
