@@ -1,5 +1,5 @@
-import { clsx } from "../../../lib/clsx";
-import { HistoricalEvent } from "../types";
+import { HistoricalEvent } from "@core/entities/HistoricalEvent";
+import clsx from "clsx";
 
 function Event({
   event,
@@ -16,7 +16,6 @@ function Event({
       onClick={onClick}
       className={clsx(
         "w-full max-w-40 p-4 my-2 bg-white rounded-md shadow-md cursor-pointer inline-block",
-        // if it's not open, make it transparent
         !isOpen ? "opacity-50" : ""
       )}
     >
