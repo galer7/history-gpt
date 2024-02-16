@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { ExtractFnReturnType, QueryConfig } from "./../../../lib/react-query";
+import { ExtractFnReturnType, QueryConfig } from "../../../lib/react-query";
 import { HistoricalEvent } from "../types";
 import { getEventsFromLLM } from "../../../lib/openai";
 

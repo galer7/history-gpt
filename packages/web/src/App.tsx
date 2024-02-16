@@ -12,6 +12,7 @@ import EventsList from "./features/events/components/EventsList";
 function App() {
   const globEl = useRef<GlobeMethods>();
   const [newTopic, setNewTopic] = useState("");
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const {
     refetch,
@@ -34,6 +35,13 @@ function App() {
     globe.controls().autoRotate = true;
     globe.controls().autoRotateSpeed = -0.35;
   }, [events]);
+
+  window.addEventListener("resize", () => {
+    const globe = globEl.current;
+    if (!globe) return;
+
+    setWindowWidth(window.innerWidth);
+  });
 
   useEffect(() => {
     console.log("currentEventIndex", currentEventIndex);
@@ -73,8 +81,6 @@ function App() {
       globe.controls().autoRotateSpeed = 0;
     });
   };
-
-  const windowWidth = window.innerWidth;
 
   const isButtonDisabled = !newTopic || isLoading;
 
