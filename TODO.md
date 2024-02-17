@@ -1,0 +1,6 @@
+- make history api accessible only when logged in
+- disable text input when not logged in
+- fix text input spacing
+- add save topic functionality
+- add cool hero page with type writer effect
+- add some form of loading when fetching history

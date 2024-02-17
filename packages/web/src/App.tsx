@@ -109,6 +109,7 @@ function App() {
 
   const { data: events, isLoading } = useEvents({
     topic,
+    token: localStorage.getItem("session") || "",
     config: { refetchOnWindowFocus: false, enabled: !!topic },
   });
   const { currentEventIndex, setCurrentEventIndex } = useCurrentEvent();

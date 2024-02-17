@@ -7,8 +7,6 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 export const handler = ApiHandler(async (_event) => {
   const session = useSession();
 
-  console.log("Session", session);
-
   if (session.type !== "user") {
     throw new Error("Not authenticated");
   }

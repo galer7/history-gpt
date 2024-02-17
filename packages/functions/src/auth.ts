@@ -26,10 +26,7 @@ export const handler = AuthHandler({
         );
 
         return Session.parameter({
-          redirect:
-            Config.STAGE === "prod"
-              ? "https://history-gpt.galer7.com"
-              : "http://localhost:3008",
+          redirect: process.env.REDIRECT_URL || "http://localhost:3008",
           type: "user",
           properties: {
             userID: claims.sub,

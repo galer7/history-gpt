@@ -15,6 +15,12 @@ export function API({ stack }: StackContext) {
   const auth = new Auth(stack, "auth", {
     authenticator: {
       handler: "packages/functions/src/auth.handler",
+      environment: {
+        REDIRECT_URL:
+          stack.stage === "prod"
+            ? "https://history-gpt.galer7.com"
+            : "http://localhost:3008",
+      },
     },
   });
 
