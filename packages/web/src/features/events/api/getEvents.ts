@@ -5,12 +5,16 @@ import { HistoricalEvent } from "@core/entities/HistoricalEvent";
 import { ExtractFnReturnType, QueryConfig } from "@web/lib/react-query";
 
 export const getEvents = async (topic: string) => {
-  return fetch(`${import.meta.env.VITE_API_URL}/events`, {
+  const events = await fetch(`${import.meta.env.VITE_API_URL}/events`, {
     method: "POST",
     body: JSON.stringify({ topic }),
   })
     .then((res) => res.json())
     .then((res) => res as HistoricalEvent[]);
+
+  console.log("events", events);
+
+  return events;
 };
 
 type QueryFnType = typeof getEvents;
@@ -42,13 +46,11 @@ export const computeArc = (
   currentEventIndex: number
 ) => {
   return currentEventIndex === 0
-    ? []
-    : [
-        {
-          startLat: events[currentEventIndex - 1].lat,
-          startLng: events[currentEventIndex - 1].lon,
-          endLat: events[currentEventIndex].lat,
-          endLng: events[currentEventIndex].lon,
-        },
-      ];
+    ? {}
+    : {
+        startLat: events[currentEventIndex - 1].lat,
+        startLng: events[currentEventIndex - 1].lon,
+        endLat: events[currentEventIndex].lat,
+        endLng: events[currentEventIndex].lon,
+      };
 };

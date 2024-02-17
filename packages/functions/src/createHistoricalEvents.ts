@@ -9,6 +9,11 @@ export const handler = ApiHandler(async (event) => {
   const { body } = validateEvent(event);
   const { topic } = body;
 
+  console.log("Create historical events endpoint called", {
+    event,
+    topic,
+  });
+
   const events = await generateHistoricalEventsUsecase({
     languageModelService: openAILanguageModelService({
       apiKey: Config.OPENAI_API_KEY,

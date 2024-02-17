@@ -11,7 +11,8 @@ import EventsList from "@web/features/events/components/EventsList";
 
 function App() {
   const globEl = useRef<GlobeMethods>();
-  const [newTopic, setNewTopic] = useState("");
+  const [input, setInput] = useState("");
+  const [topic, setTopic] = useState("");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
@@ -81,18 +82,36 @@ function App() {
     localStorage.removeItem("session");
     setSession(null);
   };
+  const [ringData, setRingData] = useState({} as { lat: number; lng: number });
+  const [arcData, setArcData] = useState(
+    {} as {
+      startLat: number;
+      startLng: number;
+      endLat: number;
+      endLng: number;
+    }
+  );
 
-  const {
-    refetch,
-    data: events,
-    isLoading,
-  } = useEvents({
-    topic: newTopic,
-    config: { enabled: false },
+  useEffect(() => {
+    getSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const token = params.get("token");
+    if (token) {
+      localStorage.setItem("session", token);
+      window.location.replace(window.location.origin);
+    }
+  }, []);
+
+  const { data: events, isLoading } = useEvents({
+    topic,
+    config: { refetchOnWindowFocus: false, enabled: !!topic },
   });
   const { currentEventIndex, setCurrentEventIndex } = useCurrentEvent();
-  const arc = computeArc(events || [], currentEventIndex);
-  const [ringData, setRingData] = useState({} as { lat: number; lng: number });
 
   useEffect(() => {
     if (events) return;
@@ -123,16 +142,21 @@ function App() {
       ringData.lat === events[currentEventIndex].lat &&
       ringData.lng === events[currentEventIndex].lon;
 
-    console.log("ringData", ringData);
-    console.log("events[currentEventIndex]", events[currentEventIndex]);
-    console.log("isSameLatLon", isSameLatLon);
-
     if (isSameLatLon) return;
 
     setRingData({
       lat: events[currentEventIndex].lat,
       lng: events[currentEventIndex].lon,
     });
+
+    setArcData(
+      computeArc(events || [], currentEventIndex) as {
+        startLat: number;
+        startLng: number;
+        endLat: number;
+        endLng: number;
+      }
+    );
 
     globe.pointOfView({
       lat: events[currentEventIndex].lat - 20,
@@ -142,16 +166,29 @@ function App() {
   }, [currentEventIndex, events, ringData]);
 
   const handleSearch = () => {
-    refetch().then(() => {
-      const globe = globEl.current;
-      if (!globe) return;
+    setTopic(input);
 
-      globe.controls().autoRotate = false;
-      globe.controls().autoRotateSpeed = 0;
-    });
+    setRingData({} as { lat: number; lng: number });
+    setArcData(
+      {} as {
+        startLat: number;
+        startLng: number;
+        endLat: number;
+        endLng: number;
+      }
+    );
+    setCurrentEventIndex(0);
   };
 
-  const isButtonDisabled = !newTopic || isLoading;
+  if (events) {
+    const globe = globEl.current;
+    if (!globe) return;
+
+    globe.controls().autoRotate = false;
+    globe.controls().autoRotateSpeed = 0;
+  }
+
+  const isButtonDisabled = !input || isLoading;
 
   return (
     <main>
@@ -175,8 +212,6 @@ function App() {
           <button
             className="bg-blue-500 text-white font-bold py-2 px-4 rounded cursor-pointer"
             onClick={() => {
-              console.log("clicked");
-
               window.location.href = `${
                 import.meta.env.VITE_API_URL
               }/auth/google/authorize`;
@@ -204,7 +239,7 @@ function App() {
           )}
           type="text"
           placeholder="Search for a topic"
-          onChange={(e) => setNewTopic(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           autoComplete="on"
         ></input>
         <button
@@ -233,7 +268,7 @@ function App() {
         ref={globEl}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        arcsData={arc}
+        arcsData={[arcData]}
         ringsData={[ringData]}
         width={windowWidth}
         height={windowHeight}

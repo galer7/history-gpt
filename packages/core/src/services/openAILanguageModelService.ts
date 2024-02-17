@@ -26,6 +26,15 @@ export const openAILanguageModelService = ({
       ...getHistoryToolsConfig(),
     });
 
+    const { completion_tokens, prompt_tokens, total_tokens } =
+      response.usage || {};
+
+    console.log("Token usage", {
+      completion_tokens,
+      prompt_tokens,
+      total_tokens,
+    });
+
     const events = JSON.parse(
       response.choices[0].message.tool_calls?.[0].function.arguments || "[]"
     ).events as HistoricalEvent[];
@@ -63,6 +72,7 @@ function getHistoryToolsConfig(): {
                 description: "The historical events",
                 items: {
                   type: "object",
+                  required: ["lat", "lon", "date", "title", "description"],
                   properties: {
                     lat: {
                       type: "number",
