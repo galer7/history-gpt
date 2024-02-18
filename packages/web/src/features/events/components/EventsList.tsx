@@ -1,15 +1,17 @@
 import { HistoricalEvent } from "@core/entities/HistoricalEvent";
 import Event from "@web/features/events/components/Event";
 
+interface EventsListProps {
+  events: HistoricalEvent[];
+  currentEventIndex: number;
+  setCurrentEventIndex: (index: number) => void;
+}
+
 function EventsList({
   events,
   currentEventIndex,
   setCurrentEventIndex,
-}: {
-  events: HistoricalEvent[];
-  currentEventIndex: number;
-  setCurrentEventIndex: (index: number) => void;
-}) {
+}: EventsListProps) {
   return (
     <div className="flex flex-col items-center w-full h-screen pr-4">
       <div className="flex flex-col items-center w-full h-screen overflow-y-scroll max-h-screen">
